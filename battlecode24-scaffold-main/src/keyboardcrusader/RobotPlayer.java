@@ -94,20 +94,20 @@ public strictfp class RobotPlayer {
 
                     if(enemies.length > 0){
                         for(int i = enemies.length-1; i >=0; i--){
-                            if(rc.canAttack(enemies[0].getLocation())){
-                                rc.attack(enemies[0].getLocation());
+                            if(rc.canAttack(enemies[i].getLocation())){
+                                rc.attack(enemies[i].getLocation());
                             }
                         }
                     }
                     else if(friends.length > 0){
                         for(int i = friends.length-1; i >=0; i--){
-                            if(rc.canHeal(enemies[0].getLocation())){
-                                rc.heal(enemies[0].getLocation());
+                            if(rc.canHeal(friends[i].getLocation()) && friends[i].getHealth()<1000){
+                                rc.heal(friends[i].getLocation());
                             }
                         }
                     }
 
-                    else if (rc.canMove(dir)){
+                    if (rc.canMove(dir)){
                         rc.move(dir);
                     }
                     else if (rc.canAttack(nextLoc)){
