@@ -89,7 +89,13 @@ public strictfp class KeyboardCrusader {
                     // Move and attack randomly if no objective.
                     Direction dir = directions[rng.nextInt(directions.length)];
                     MapLocation nextLoc = rc.getLocation().add(dir);
-                    if (rc.canMove(dir)){
+                    RobotInfo[]  rInfo = rc.senseNearbyRobots(-1, rc.getTeam().opponent());
+
+                    if(rInfo.length > 0){
+                        rc.attack(rInfo[0].getLocation());
+                    }
+
+                    else if (rc.canMove(dir)){
                         rc.move(dir);
                     }
                     else if (rc.canAttack(nextLoc)){
