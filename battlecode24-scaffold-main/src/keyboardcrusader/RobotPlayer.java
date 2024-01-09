@@ -9,7 +9,7 @@ import java.util.Random;
  * The run() method inside this class is like your main function: this is what we'll call once your robot
  * is created!
  */
-public strictfp class KeyboardCrusader {
+public strictfp class RobotPlayer {
 
     /**
      * We will use this variable to count the number of turns this robot has been alive.
@@ -89,10 +89,22 @@ public strictfp class KeyboardCrusader {
                     // Move and attack randomly if no objective.
                     Direction dir = directions[rng.nextInt(directions.length)];
                     MapLocation nextLoc = rc.getLocation().add(dir);
-                    RobotInfo[]  rInfo = rc.senseNearbyRobots(-1, rc.getTeam().opponent());
+                    RobotInfo[]  enemies = rc.senseNearbyRobots(-1, rc.getTeam().opponent());
+                    RobotInfo[]  friends = rc.senseNearbyRobots(-1, rc.getTeam());
 
-                    if(rInfo.length > 0){
-                        rc.attack(rInfo[0].getLocation());
+                    if(enemies.length > 0){
+                        for(int i = enemies.length-1; i >=0; i--){
+                            if(rc.canAttack(enemies[0].getLocation())){
+                                rc.attack(enemies[0].getLocation());
+                            }
+                        }
+                    }
+                    else if(friends.length > 0){
+                        for(int i = friends.length-1; i >=0; i--){
+                            if(rc.canHeal(enemies[0].getLocation())){
+                                rc.heal(enemies[0].getLocation());
+                            }
+                        }
                     }
 
                     else if (rc.canMove(dir)){
