@@ -1,6 +1,7 @@
 package keyboardcrusader;
 
 import battlecode.common.*;
+import scala.Int;
 
 import java.util.Random;
 
@@ -25,6 +26,12 @@ public strictfp class RobotPlayer {
      * we get the same sequence of numbers every time this code is run. This is very useful for debugging!
      */
     static final Random rng = new Random(6147);
+
+
+    //RobotClass
+    //0 = Fighter
+    //1 = Healer
+    static int robotClass = 0;
 
     /** Array containing all the possible movement directions. */
     static final Direction[] directions = {
@@ -54,6 +61,14 @@ public strictfp class RobotPlayer {
 
         // You can also use indicators to save debug notes in replays.
         rc.setIndicatorString("Hello world!");
+
+        //RobotClass
+        if(rc.getID()%5 == 1){
+            robotClass = 1;
+        }
+        else {
+            robotClass = 0;
+        }
 
         while (true) {
             // This code runs during the entire lifespan of the robot, which is why it is in an infinite
@@ -92,27 +107,17 @@ public strictfp class RobotPlayer {
                     RobotInfo[]  enemies = rc.senseNearbyRobots(-1, rc.getTeam().opponent());
                     RobotInfo[]  friends = rc.senseNearbyRobots(-1, rc.getTeam());
 
-                    if(enemies.length > 0){
-                        for(int i = enemies.length-1; i >=0; i--){
-                            if(rc.canAttack(enemies[i].getLocation())){
-                                rc.attack(enemies[i].getLocation());
-                            }
-                        }
-                    }
-                    else if(friends.length > 0){
-                        for(int i = friends.length-1; i >=0; i--){
-                            if(rc.canHeal(friends[i].getLocation()) && friends[i].getHealth()<1000){
-                                rc.heal(friends[i].getLocation());
-                            }
-                        }
-                    }
+                    if(rc.getID() %2 == 1){
+                        MicroMovement.moveR(rc, new MapLocation(rc.getMapWidth()/2, rc.getMapHeight()/2));
+                        rc.setIndicatorString("Moving to center X:" + Integer.toString(rc.getMapWidth()/2) + " Y:" + Integer.toString(rc.getMapHeight()/2));
 
-                    if (rc.canMove(dir)){
-                        rc.move(dir);
                     }
-                    else if (rc.canAttack(nextLoc)){
-                        rc.attack(nextLoc);
-                        System.out.println("Take that! Damaged an enemy that was in our way!");
+                    else {
+                        System.out.println(Integer.toString(new Random().nextInt(5)));
+                        MicroMovement.moveR(rc, new MapLocation(new Random().nextInt(rc.getMapWidth()),new Random().nextInt(rc.getMapHeight())));
+                        //rc.setIndicatorString("Moving to base X:" + Integer.toString(rc.getAllySpawnLocations()[new Random().nextInt(3)].x) +
+                        //        " Y:" + Integer.toString(rc.getAllySpawnLocations()[new Random().nextInt(3)].y));
+
                     }
 
                     // Rarely attempt placing traps behind the robot.

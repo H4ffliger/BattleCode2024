@@ -94,6 +94,31 @@ public strictfp class RobotPlayer {
                     // Move and attack randomly if no objective.
                     Direction dir = directions[rng.nextInt(directions.length)];
                     MapLocation nextLoc = rc.getLocation().add(dir);
+
+                    RobotInfo[]  enemies = rc.senseNearbyRobots(-1, rc.getTeam().opponent());
+                    RobotInfo[]  friends = rc.senseNearbyRobots(-1, rc.getTeam());
+
+                    if(enemies.length > 0){
+                        for(int i = enemies.length-1; i >=0; i--){
+                            if(rc.canAttack(enemies[i].getLocation())){
+                                rc.attack(enemies[i].getLocation());
+                            }
+                        }
+                    }
+                    else if(friends.length > 0){
+                        for(int i = friends.length-1; i >=0; i--){
+                            if(rc.canHeal(friends[i].getLocation()) && friends[i].getHealth()<1000){
+                                rc.heal(friends[i].getLocation());
+                            }
+                        }
+                    }
+
+                    if (rc.canMove(dir)){
+                        rc.move(dir);
+                    }
+
+
+
                     if (rc.canMove(dir)){
                         rc.move(dir);
                     }
