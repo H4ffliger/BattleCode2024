@@ -29,7 +29,7 @@ public class RobotAction {
     }
 
 
-    public static void healLowestRobot(RobotController rc) throws GameActionException{
+    public static boolean healLowestRobot(RobotController rc) throws GameActionException{
         RobotInfo[]  friends = rc.senseNearbyRobots(-1, rc.getTeam());
         RobotInfo lowestRobotPlayer = null;
 
@@ -43,7 +43,9 @@ public class RobotAction {
             }
             if(rc.canHeal(lowestRobotPlayer.getLocation())){
                 rc.heal(lowestRobotPlayer.getLocation());
+                return true;
             }
         }
+        return false;
     }
 }

@@ -4,6 +4,7 @@ import battlecode.common.*;
 import scala.Int;
 
 import java.util.Random;
+import static keyboardcrusader.Strategy.robotClass;
 
 /**
  * RobotPlayer is the class that describes your main robot strategy.
@@ -25,13 +26,8 @@ public strictfp class RobotPlayer {
      * import at the top of this file. Here, we *seed* the RNG with a constant number (6147); this makes sure
      * we get the same sequence of numbers every time this code is run. This is very useful for debugging!
      */
-    static final Random rng = new Random(6147);
 
-
-    //RobotClass
-    //0 = Fighter
-    //1 = Healer
-    static int robotClass = 0;
+    static Random rng;
 
     /** Array containing all the possible movement directions. */
     static final Direction[] directions = {
@@ -55,20 +51,17 @@ public strictfp class RobotPlayer {
     @SuppressWarnings("unused")
     public static void run(RobotController rc) throws GameActionException {
 
+
+        rng = new Random( rc.getID() + rc.getRoundNum() + rc.getCrumbs());
+
+
+
         // Hello world! Standard output is very useful for debugging.
         // Everything you say here will be directly viewable in your terminal when you run a match!
-        System.out.println("I'm alive");
+        //System.out.println("I'm alive");
 
         // You can also use indicators to save debug notes in replays.
-        rc.setIndicatorString("Hello world!");
-
-        //RobotClass
-        if(rc.getID()%5 == 1){
-            robotClass = 1;
-        }
-        else {
-            robotClass = 0;
-        }
+        //rc.setIndicatorString("Hello world!");
 
         while (true) {
             // This code runs during the entire lifespan of the robot, which is why it is in an infinite
@@ -85,7 +78,8 @@ public strictfp class RobotPlayer {
                     MapLocation[] spawnLocs = rc.getAllySpawnLocations();
                     // Pick a random spawn location to attempt spawning in.
                     MapLocation randomLoc = spawnLocs[rng.nextInt(spawnLocs.length)];
-                    if (rc.canSpawn(randomLoc)) rc.spawn(randomLoc);
+                    MapLocation nSpawn = randomLoc.add(directions[rng.nextInt(8)]);
+                    if (rc.canSpawn(nSpawn)) rc.spawn(nSpawn);
                 }
                 else{
                     if (rc.canPickupFlag(rc.getLocation())){
@@ -101,30 +95,25 @@ public strictfp class RobotPlayer {
                         Direction dir = rc.getLocation().directionTo(firstLoc);
                         if (rc.canMove(dir)) rc.move(dir);
                     }
-                    // Move and attack randomly if no objective.
+
+
+
                     Direction dir = directions[rng.nextInt(directions.length)];
                     MapLocation nextLoc = rc.getLocation().add(dir);
                     RobotInfo[]  enemies = rc.senseNearbyRobots(-1, rc.getTeam().opponent());
                     RobotInfo[]  friends = rc.senseNearbyRobots(-1, rc.getTeam());
 
-                    if(rc.getID() %2 == 1){
+
+                    Strategy.gameStrategy(rc);
+                    /*if(rc.getID() %2 == 1){
                         MicroMovement.moveR(rc, new MapLocation(rc.getMapWidth()/2, rc.getMapHeight()/2));
                         rc.setIndicatorString("Moving to center X:" + Integer.toString(rc.getMapWidth()/2) + " Y:" + Integer.toString(rc.getMapHeight()/2));
-
                     }
                     else {
                         System.out.println(Integer.toString(new Random().nextInt(5)));
                         MicroMovement.moveR(rc, new MapLocation(new Random().nextInt(rc.getMapWidth()),new Random().nextInt(rc.getMapHeight())));
-                        //rc.setIndicatorString("Moving to base X:" + Integer.toString(rc.getAllySpawnLocations()[new Random().nextInt(3)].x) +
-                        //        " Y:" + Integer.toString(rc.getAllySpawnLocations()[new Random().nextInt(3)].y));
+                    }*/
 
-                    }
-
-                    // Rarely attempt placing traps behind the robot.
-                    MapLocation prevLoc = rc.getLocation().subtract(dir);
-                    if (rc.canBuild(TrapType.EXPLOSIVE, prevLoc) && rng.nextInt() % 37 == 1)
-                        rc.build(TrapType.EXPLOSIVE, prevLoc);
-                    // We can also move our code into different methods or classes to better organize it!
                     updateEnemyRobots(rc);
                 }
 
@@ -156,7 +145,6 @@ public strictfp class RobotPlayer {
         // use the largest possible value.
         RobotInfo[] enemyRobots = rc.senseNearbyRobots(-1, rc.getTeam().opponent());
         if (enemyRobots.length != 0){
-            rc.setIndicatorString("There are nearby enemy robots! Scary!");
             // Save an array of locations with enemy robots in them for future use.
             MapLocation[] enemyLocations = new MapLocation[enemyRobots.length];
             for (int i = 0; i < enemyRobots.length; i++){
