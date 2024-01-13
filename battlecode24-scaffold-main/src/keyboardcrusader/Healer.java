@@ -66,7 +66,6 @@ public class Healer {
 
         if(rc.getRoundNum()<200){
             MicroMovement.moveR(rc, setupLocationH);
-            rc.setIndicatorLine(rc.getLocation(), setupLocationH, 0, 255, 0);
         }
         else if( rc.getRoundNum() < 600){
             attackLocationH = setupLocationH;
@@ -90,11 +89,9 @@ public class Healer {
                 }
             }
             MicroMovement.moveR(rc, attackLocationH);
-            rc.setIndicatorLine(rc.getLocation(),attackLocationH , 255, 0, 0);
         }
         else{
             MicroMovement.moveR(rc, attackLocationH);
-            rc.setIndicatorLine(rc.getLocation(),attackLocationH , 255, 0, 0);
         }
 
 

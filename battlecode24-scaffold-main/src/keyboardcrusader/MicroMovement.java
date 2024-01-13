@@ -2,6 +2,11 @@ package keyboardcrusader;
 
 import battlecode.common.*;
 import examplefuncsplayer.RobotPlayer;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static keyboardcrusader.RobotPlayer.directions;
 import static keyboardcrusader.Strategy.robotClass;
 import static keyboardcrusader.RobotPlayer.rng;
 
@@ -28,7 +33,7 @@ public class MicroMovement {
         }
         if (enemies.length > 0) {
             if(robotClass == 0) {
-                fightMode = 2;
+                fightMode = 1;
             }
             if(robotClass >0){
                 fightMode = 4;
@@ -59,6 +64,23 @@ public class MicroMovement {
             }
         }
         else{
+
+            //Remove water if not in fight
+            MapLocation fillUpTheWaterLocation = new MapLocation(0, 0);
+            MapInfo infos[] = rc.senseNearbyMapInfos(3);
+            for (int i = infos.length - 1; i >= 0; i--) {
+                if (infos[i].isWater()) {
+                    if (fillUpTheWaterLocation.distanceSquaredTo(rc.getLocation()) > rc.getLocation().distanceSquaredTo(infos[i].getMapLocation()))
+                        fillUpTheWaterLocation = infos[i].getMapLocation();
+                }
+            }
+            if(rc.canFill(fillUpTheWaterLocation)){
+                rc.fill(fillUpTheWaterLocation);
+            }
+            if(mapLocation.distanceSquaredTo(rc.getLocation()) > 20){
+                Direction d = rc.getLocation().directionTo(mapLocation);
+                mapLocation = rc.getLocation().add(d).add(d).add(d).add(d).add(d).add(d).add(d);
+            }
             fineMovement(rc, mapLocation);
             RobotAction.healLowestRobot(rc);
             }
@@ -66,59 +88,97 @@ public class MicroMovement {
     }
 
     public static void fineMovement(RobotController rc, MapLocation mapLocation) throws GameActionException {
-        if((rc.getRoundNum()+ rc.getID()) %5  == 1){
-            if(latestSelfLocation.distanceSquaredTo(rc.getLocation()) <= 2 && rc.getLocation().distanceSquaredTo(mapLocation) >3){
-                if(antiStuckStrategy == 0){
-                    antiStuckStrategy = 1;
-                }
-                else if(antiStuckStrategy == 1){
-                    antiStuckStrategy = 2;
-                }
-                else if(antiStuckStrategy == 2)
-                    antiStuckStrategy = rng.nextInt(2);
+
+        //AntiStuck mechanics edge
+        //ToDo: Wenn Ziel zu weit weg, dann einen Zwischenpunkt festlegen
+        /*if(rc.getRoundNum()+rc.getID()%10 == 1){
+            if(rc.getLocation().distanceSquaredTo(latestSelfLocation) <3){
+                antiStuckSteps = 10;
             }
             latestSelfLocation = rc.getLocation();
         }
-        if(antiStuckStrategy == 0){
-            Direction generalDirection = rc.getLocation().directionTo(mapLocation);
-            if(rc.canMove(rc.getLocation().directionTo(mapLocation))){
-                rc.move(rc.getLocation().directionTo(mapLocation));
-            }
-            else if(rc.canMove(rc.getLocation().directionTo(mapLocation).rotateRight())){
-                rc.move(rc.getLocation().directionTo(mapLocation).rotateRight());
-            }
-            else if(rc.canMove(rc.getLocation().directionTo(mapLocation).rotateRight().rotateRight())){
-                rc.canMove(rc.getLocation().directionTo(mapLocation).rotateRight().rotateRight());
-            }
-            else if(rc.canMove(rc.getLocation().directionTo(mapLocation).rotateRight().rotateRight().rotateRight())){
-                rc.canMove(rc.getLocation().directionTo(mapLocation).rotateRight().rotateRight().rotateRight());
+        if(antiStuckSteps >= 0){
+            if(antiStuckStrategy == 0){
+                mapLocation = new MapLocation(rc.getMapWidth()/2, rc.getMapHeight()/2);
             }
         }
-        else if(antiStuckStrategy == 1){
-            if(rc.canMove(rc.getLocation().directionTo(mapLocation))){
-                rc.move(rc.getLocation().directionTo(mapLocation));
-            }
-            else if(rc.canMove(rc.getLocation().directionTo(mapLocation).rotateLeft())){
-                rc.move(rc.getLocation().directionTo(mapLocation).rotateLeft());
-            }
-            else if(rc.canMove(rc.getLocation().directionTo(mapLocation).rotateLeft().rotateLeft())){
-                rc.canMove(rc.getLocation().directionTo(mapLocation).rotateLeft().rotateLeft());
-            }
-            else if(rc.canMove(rc.getLocation().directionTo(mapLocation).rotateLeft().rotateLeft().rotateLeft())){
-                rc.canMove(rc.getLocation().directionTo(mapLocation).rotateLeft().rotateLeft().rotateLeft());
-            }
-        }
-        else if(antiStuckStrategy == 2){
+        antiStuckSteps --;*/
 
-            if(rc.canMove(rc.getLocation().directionTo(mapLocation).opposite().rotateLeft().rotateLeft())){
-                rc.move(rc.getLocation().directionTo(mapLocation).opposite().rotateLeft().rotateLeft());
-            }
-            else if(rc.canMove(rc.getLocation().directionTo(mapLocation).opposite().rotateLeft())){
-                rc.move(rc.getLocation().directionTo(mapLocation).opposite().rotateLeft());
-            }
-            else if(rc.canMove(rc.getLocation().directionTo(mapLocation).opposite().rotateLeft().rotateLeft().rotateLeft())){
-                rc.canMove(rc.getLocation().directionTo(mapLocation).opposite().rotateLeft().rotateLeft().rotateLeft());
+        //Calculates best moves for the future for the next 4 moves
+        // Use monte carlo, because it's easy to tune efficiency
+
+        //This number * 7 (for every location)
+        int totalMovesToCalculate = 3;
+        int movesInAdvance = 2;
+        List<Direction> calculateLocations = new ArrayList<>();
+        int biasScore[] = {1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000};
+        MapInfo isPassable[] = rc.senseNearbyMapInfos(2);
+        //Bytecode Limit
+        List<MapLocation> passable = new ArrayList<>();
+        for (int i = isPassable.length - 1; i >= 0; i--) {
+            if (isPassable[i].isPassable() == false) {
+                passable.add(isPassable[i].getMapLocation());
             }
         }
+
+        for(int s = 0; s < 8; s++) {
+            calculateLocations.add(Direction.values()[s]);
+            for(int p = totalMovesToCalculate; p >= 0; p--){
+                Direction tempFutureGuessLocation = calculateLocations.get(s);
+                if(rc.canMove(tempFutureGuessLocation)){
+                    MapLocation tempMp = rc.getLocation().add(tempFutureGuessLocation);
+                    for(int a = movesInAdvance; a >= 0; a--) {
+                        Direction rngDirection = Direction.values()[rng.nextInt(directions.length)];
+                        boolean canMove = true;
+                        for (int i = passable.size() - 1; i >= 0; i--) {
+                            if (tempMp.add(rngDirection) ==passable.get(i)) {
+                                canMove = false;
+                            }
+                        }
+                        if(canMove){
+                            tempMp = tempMp.add(rngDirection);
+                        }
+                    }
+                    if(tempMp.distanceSquaredTo(mapLocation) < biasScore[s]){
+                     biasScore[s] = tempMp.distanceSquaredTo(mapLocation);
+                    }
+                }
+                else {
+                    //No possible moves in this direction
+                    break;
+                }
+            }
+        }
+        int indexBestMove = 0;
+        int bestMoveScore = 1000;
+        int indexSecondBestMove = 0;
+        int secondbestMoveScore = 1000;
+        for(int i = biasScore.length-1; i >=0; i--){
+            if(bestMoveScore > biasScore[i]){
+                bestMoveScore = biasScore[i];
+                indexBestMove = i;
+            }
+        }
+        for(int i = biasScore.length-1; i >=0; i--){
+            if(secondbestMoveScore > biasScore[i] && bestMoveScore != biasScore[i]){
+                secondbestMoveScore = biasScore[i];
+                indexSecondBestMove = i;
+            }
+        }
+
+
+        if(rc.canMove(Direction.values()[indexBestMove])){
+            rc.move(Direction.values()[indexBestMove]);
+        }
+        else if(rc.canMove(Direction.values()[indexSecondBestMove])){
+            rc.move(Direction.values()[indexSecondBestMove]);
+
+        }
+        else{
+            rc.setIndicatorString("Pathfinding error, best and second best move not possible");
+            //System.out.println("Pathfinding, best and second best move not possible");
+        }
+        rc.setIndicatorLine(rc.getLocation(), mapLocation, 255, 0, 0);
+
     }
 }

@@ -2,7 +2,7 @@ package keyboardcrusader;
 
 import battlecode.common.*;
 
-public class Figther {
+public class Fighter {
 
     //Figthers are grouped into 3 groups
     //Top = 0, Center = 1, Bottom = 2
@@ -61,7 +61,6 @@ public class Figther {
 
         if(rc.getRoundNum()<200){
             MicroMovement.moveR(rc, setupLocation);
-            rc.setIndicatorLine(rc.getLocation(), setupLocation, 255, 0, 0);
         }
         else if( rc.getRoundNum() < 600){
             attackLocation = setupLocation;
@@ -85,11 +84,9 @@ public class Figther {
                 }
             }
             MicroMovement.moveR(rc, attackLocation);
-            rc.setIndicatorLine(rc.getLocation(),attackLocation , 255, 0, 0);
         }
         else{
             MicroMovement.moveR(rc, attackLocation);
-            rc.setIndicatorLine(rc.getLocation(),attackLocation , 255, 0, 0);
         }
     }
 }

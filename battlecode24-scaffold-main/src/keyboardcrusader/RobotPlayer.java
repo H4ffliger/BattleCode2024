@@ -82,6 +82,11 @@ public strictfp class RobotPlayer {
                     if (rc.canSpawn(nSpawn)) rc.spawn(nSpawn);
                 }
                 else{
+                    if(rc.getRoundNum() ==5){
+                        System.out.println(directions[0]);
+                        System.out.println(Direction.values()[7]);
+                    }
+
                     if (rc.canPickupFlag(rc.getLocation())){
                         rc.pickupFlag(rc.getLocation());
                         rc.setIndicatorString("Holding a flag!");
