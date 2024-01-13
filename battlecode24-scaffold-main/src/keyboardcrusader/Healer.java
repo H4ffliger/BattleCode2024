@@ -13,35 +13,36 @@ public class Healer {
 
     public static void think(RobotController rc) throws GameActionException {
 
-        if (rc.getID() % 21 == 7) {
-            healSquad = 0;
-            rc.setIndicatorDot(rc.getLocation(), 255, 0, 0);
-        } else if (rc.getID() % 21 == 14) {
-            healSquad = 1;
-            rc.setIndicatorDot(rc.getLocation(), 0, 255, 0);
-        } else if (rc.getID() % 21 == 21) {
-            healSquad = 2;
-            rc.setIndicatorDot(rc.getLocation(), 0, 0, 255);
-        }
+        if(setupLocationH == null){
+            System.out.println("Thinking for the first time on round " + rc.getRoundNum());
 
-        //Get the position for the fall of the dam
-        if (setupLocationH == null) {
-            int xSetupModifier = 2;
-            int ySetupModifier = 2;
-            if (Strategy.mapOrientation == 0) {
-                if(rc.getAllySpawnLocations()[1].x < rc.getMapWidth() / 2){
-                    xSetupModifier = -3;
-                }
-                setupLocationH = new MapLocation(rc.getMapWidth() / 2 + xSetupModifier, rc.getMapHeight() / 4 * healSquad + rc.getMapHeight() / 4);
+            for(int s = 63; s >= 0; s--){
+                if(rc.readSharedArray(s) != 0 && s != 0){
+                    int deparseX;
+                    int deparseY = Integer.parseInt(Integer.toString(rc.readSharedArray(rc.getID()%s+1)).substring(2));
+                    if(Integer.toString(rc.readSharedArray(rc.getID()%s+1)).length()==4){
+                        deparseX = Integer.parseInt(Integer.toString(rc.readSharedArray(rc.getID()%s+1)).substring(0, 1));
+                    }
+                    else{
+                        deparseX = Integer.parseInt(Integer.toString(rc.readSharedArray(rc.getID()%s+1)).substring(0, 2));
+                    }
 
-            } else {
-                if(rc.getAllySpawnLocations()[1].y < rc.getMapHeight() / 2){
-                    ySetupModifier = -3;
+                    setupLocationH = new MapLocation(deparseX, deparseY);
+                    System.out.println("RAW DATA: " + rc.readSharedArray(rc.getID()%s+1) + ", destructed data: " + deparseX + ";" + deparseY);
+                    System.out.println("Amount of dams found: " + s);
+                    s = -1;
+                    break;
                 }
-                setupLocationH = new MapLocation(rc.getMapWidth() / 4 * healSquad + rc.getMapWidth() / 4, rc.getMapHeight() / 2 + +ySetupModifier);
+                else if (s == 0) {
+                    System.out.println("Error shared string is empty No dam information");
+                    setupLocationH = new MapLocation( rc.getMapWidth()/2, rc.getMapHeight()/2);
+                }
             }
+            Direction d;
+            //Fall behind fighters
+            d = setupLocationH.directionTo(rc.getAllySpawnLocations()[1]);
+            setupLocationH = setupLocationH.add(d).add(d).add(d);
         }
-
 
         RobotInfo[] enemies = rc.senseNearbyRobots(-1, rc.getTeam().opponent());
 
@@ -67,26 +68,18 @@ public class Healer {
         if(rc.getRoundNum()<200){
             MicroMovement.moveR(rc, setupLocationH);
         }
-        else if( rc.getRoundNum() < 600){
+        else if( rc.getRoundNum() < 550){
             attackLocationH = setupLocationH;
-            for(int i = ((rc.getRoundNum()-200)/30); i >=0; i --){
-                if(Strategy.mapOrientation == 0){
-                    if(rc.getAllySpawnLocations()[1].x < attackLocationH.x){
-                        attackLocationH = attackLocationH.add(Direction.EAST);
-                    }
-                    else{
-                        attackLocationH = attackLocationH.add(Direction.WEST);
-                    }
-                }
-                else {
-                    if(rc.getAllySpawnLocations()[1].y < attackLocationH.y){
-                        attackLocationH = attackLocationH.add(Direction.NORTH);
-                    }
-                    else {
-                        attackLocationH = attackLocationH.add(Direction.SOUTH);
+            //Smooth push
+            MapLocation allySpawns[] = rc.getAllySpawnLocations();
 
-                    }
-                }
+            MapLocation centerSpawn = new MapLocation(
+                    (allySpawns[0].x + allySpawns[1].x + allySpawns[2].x)/3,
+                    (allySpawns[0].y + allySpawns[1].y + allySpawns[2].y)/3);
+
+            attackLocationH = setupLocationH;
+            for(int i = ((rc.getRoundNum()-200)/((rc.getMapHeight()+rc.getMapWidth())/4)); i >=0; i --) {
+                attackLocationH = attackLocationH.add(centerSpawn.directionTo(setupLocationH));
             }
             MicroMovement.moveR(rc, attackLocationH);
         }

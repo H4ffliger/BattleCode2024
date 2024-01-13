@@ -14,49 +14,31 @@ public class Fighter {
     static MapLocation closestEnemyPosF = new MapLocation(0,0);
     public static void think(RobotController rc) throws GameActionException {
 
-        /*
-        if(rc.getID()%10 ==3 || rc.getID()%10 ==4){
-            figthSquad = 0;
-            rc.setIndicatorDot(rc.getLocation(), 255,0,0);
-        }
-        else if(rc.getID()%10 ==5 || rc.getID()%10 ==6 || rc.getID()%10 ==9){
-            figthSquad = 1;
-            rc.setIndicatorDot(rc.getLocation(), 0,255,0);
-        }
-        else if(rc.getID()%10 ==7 || rc.getID()%10 ==8){
-            figthSquad = 2;
-            rc.setIndicatorDot(rc.getLocation(), 0,0,255);
-        }
-
-
-
-
-
-        //Get the position for the fall of the dam
-        if(setupLocation == null){
-            //
-            if(Strategy.mapOrientation == 0){
-                setupLocation = new MapLocation(rc.getMapWidth()/2, rc.getMapHeight()/4*figthSquad+rc.getMapHeight()/4);
-            }
-            else {
-                setupLocation = new MapLocation(rc.getMapWidth()/4*figthSquad+rc.getMapWidth()/4, rc.getMapHeight()/2);
-            }
-        }
-        */
-
         if(setupLocation == null){
             System.out.println("Thinking for the first time on round " + rc.getRoundNum());
-            for(int s = 63; s >= 0; s--){
-                if(rc.readSharedArray(s) != 0){
-                    setupLocation = new MapLocation(Integer.parseInt(Integer.toString(rc.readSharedArray(rc.getID()%s+1)).substring(0, 2)),
-                            Integer.parseInt(Integer.toString(rc.readSharedArray(rc.getID()%s+1)).substring(2)));
-                    System.out.println("RAW DATA: " + rc.readSharedArray(rc.getID()%s+1) + ", destructed data: " + Integer.toString(rc.readSharedArray(rc.getID()%s+1)).substring(0, 2)
-                    + "; " + Integer.parseInt(Integer.toString(rc.readSharedArray(rc.getID()%s+1)).substring(2)));
 
+            for(int s = 63; s >= 0; s--){
+                if(rc.readSharedArray(s) != 0 && s != 0){
+                    int deparseX;
+                    int deparseY = Integer.parseInt(Integer.toString(rc.readSharedArray(rc.getID()%s+1)).substring(2));
+                    if(Integer.toString(rc.readSharedArray(rc.getID()%s+1)).length()==4){
+                        deparseX = Integer.parseInt(Integer.toString(rc.readSharedArray(rc.getID()%s+1)).substring(0, 1));
+                    }
+                    else{
+                        deparseX = Integer.parseInt(Integer.toString(rc.readSharedArray(rc.getID()%s+1)).substring(0, 2));
+                    }
+
+                    setupLocation = new MapLocation(deparseX, deparseY);
+                    System.out.println("RAW DATA: " + rc.readSharedArray(rc.getID()%s+1) + ", destructed data: " + deparseX + ";" + deparseY);
+                    System.out.println("Amount of dams found: " + s);
+                    s = -1;
                     break;
+                } else if (s == 0) {
+                    System.out.println("Error shared string is empty No dam information");
+                    setupLocation = new MapLocation( rc.getMapWidth()/2, rc.getMapHeight()/2);
+
                 }
             }
-
         }
 
 
@@ -79,29 +61,19 @@ public class Fighter {
         }
 
 
-        if(rc.getRoundNum()<20000){
+        if(rc.getRoundNum()<200){
             MicroMovement.moveR(rc, setupLocation);
         }
-        else if( rc.getRoundNum() < 600){
-            attackLocation = setupLocation;
-            for(int i = ((rc.getRoundNum()-200)/30); i >=0; i --){
-                if(Strategy.mapOrientation == 0){
-                    if(rc.getAllySpawnLocations()[1].x < attackLocation.x){
-                        attackLocation = attackLocation.add(Direction.EAST);
-                    }
-                    else{
-                        attackLocation = attackLocation.add(Direction.WEST);
-                    }
-                }
-                else {
-                    if(rc.getAllySpawnLocations()[1].y < attackLocation.y){
-                        attackLocation = attackLocation.add(Direction.NORTH);
-                    }
-                    else {
-                        attackLocation = attackLocation.add(Direction.SOUTH);
+        else if( rc.getRoundNum() < 550){
+            //Smooth push
+            MapLocation allySpawns[] = rc.getAllySpawnLocations();
+            MapLocation centerSpawn = new MapLocation(
+                    (allySpawns[0].x + allySpawns[1].x + allySpawns[2].x)/3,
+                    (allySpawns[0].y + allySpawns[1].y + allySpawns[2].y)/3);
 
-                    }
-                }
+            attackLocation = setupLocation;
+            for(int i = ((rc.getRoundNum()-200)/((rc.getMapHeight()+rc.getMapWidth())/4)); i >=0; i --) {
+                attackLocation = attackLocation.add(centerSpawn.directionTo(setupLocation));
             }
             MicroMovement.moveR(rc, attackLocation);
         }

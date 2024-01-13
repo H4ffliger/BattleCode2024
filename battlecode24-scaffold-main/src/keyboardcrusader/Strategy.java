@@ -126,7 +126,6 @@ public class Strategy {
         //Spotting
         //ToDo: It's a bit buggy
         else if (rc.getRoundNum() < 170) {
-            if(rc.getID() % 10 <=1){
             rc.setIndicatorString("Spotter");
 
             if (rc.getRoundNum() >= 160) {
@@ -134,7 +133,7 @@ public class Strategy {
                 for(int x  = damInfo.size()-1; x >= 0; x--){
                     boolean isInList = false;
                     int emptyIndex = -1;
-                    //System.out.println("Dam positions to add to the shared array: " + damInfo.size());
+                    System.out.println("Dam positions to add to the shared array: " + damInfo.size());
                     for(int s = 63; s >=0; s--) {
                         if(rc.readSharedArray(s) == 0){
                             emptyIndex = s;
@@ -164,8 +163,8 @@ public class Strategy {
                 }
             }
             else {
-                for (int x = rc.getMapWidth() - 1; x >= 0; x -= rng.nextInt(2) + 1) {
-                    for (int y = rc.getMapHeight() - 1; y >= 0; y -= rng.nextInt(2) + 1) {
+                for (int x = rc.getMapWidth() - 1; x >= 0; x -= rng.nextInt(rc.getMapWidth()/15) + 1) {
+                    for (int y = rc.getMapHeight() - 1; y >= 0; y -= rng.nextInt(rc.getMapHeight()/15) + 1) {
                         try {
                             MapInfo mapInfo = rc.senseMapInfo(new MapLocation(x, y));
                             if (mapInfo.isDam()) {
@@ -179,7 +178,6 @@ public class Strategy {
                         }
                     }
                 }
-            }
             }
         }
                 //Give the robots their autonomy to think for them self, now they only get their commands with the shared array
