@@ -83,8 +83,7 @@ public strictfp class RobotPlayer {
                 }
                 else{
                     if(rc.getRoundNum() ==5){
-                        System.out.println(directions[0]);
-                        System.out.println(Direction.values()[7]);
+                        System.out.println(rc.readSharedArray(0));
                     }
 
                     if (rc.canPickupFlag(rc.getLocation())){

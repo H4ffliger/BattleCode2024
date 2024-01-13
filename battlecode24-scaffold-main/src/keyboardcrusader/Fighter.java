@@ -1,6 +1,7 @@
 package keyboardcrusader;
 
 import battlecode.common.*;
+import scala.Int;
 
 public class Fighter {
 
@@ -13,6 +14,7 @@ public class Fighter {
     static MapLocation closestEnemyPosF = new MapLocation(0,0);
     public static void think(RobotController rc) throws GameActionException {
 
+        /*
         if(rc.getID()%10 ==3 || rc.getID()%10 ==4){
             figthSquad = 0;
             rc.setIndicatorDot(rc.getLocation(), 255,0,0);
@@ -27,6 +29,9 @@ public class Fighter {
         }
 
 
+
+
+
         //Get the position for the fall of the dam
         if(setupLocation == null){
             //
@@ -37,7 +42,22 @@ public class Fighter {
                 setupLocation = new MapLocation(rc.getMapWidth()/4*figthSquad+rc.getMapWidth()/4, rc.getMapHeight()/2);
             }
         }
+        */
 
+        if(setupLocation == null){
+            System.out.println("Thinking for the first time on round " + rc.getRoundNum());
+            for(int s = 63; s >= 0; s--){
+                if(rc.readSharedArray(s) != 0){
+                    setupLocation = new MapLocation(Integer.parseInt(Integer.toString(rc.readSharedArray(rc.getID()%s+1)).substring(0, 2)),
+                            Integer.parseInt(Integer.toString(rc.readSharedArray(rc.getID()%s+1)).substring(2)));
+                    System.out.println("RAW DATA: " + rc.readSharedArray(rc.getID()%s+1) + ", destructed data: " + Integer.toString(rc.readSharedArray(rc.getID()%s+1)).substring(0, 2)
+                    + "; " + Integer.parseInt(Integer.toString(rc.readSharedArray(rc.getID()%s+1)).substring(2)));
+
+                    break;
+                }
+            }
+
+        }
 
 
 
@@ -59,7 +79,7 @@ public class Fighter {
         }
 
 
-        if(rc.getRoundNum()<200){
+        if(rc.getRoundNum()<20000){
             MicroMovement.moveR(rc, setupLocation);
         }
         else if( rc.getRoundNum() < 600){

@@ -44,7 +44,7 @@ public class MicroMovement {
         if (fightMode > 0) {
             if(robotClass == 0) {
                 RobotAction.attackLowestHealthEnemy(rc);
-                if (rc.getLocation().distanceSquaredTo(closestEnemyPos) <= 3) {
+                if (rc.getLocation().distanceSquaredTo(closestEnemyPos) <= 2) {
                     fineMovement(rc, rc.getLocation().add(closestEnemyPos.directionTo(rc.getLocation())));
                     RobotAction.attackLowestHealthEnemy(rc);
                 } else {
