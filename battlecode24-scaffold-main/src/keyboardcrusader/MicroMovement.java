@@ -6,6 +6,7 @@ import examplefuncsplayer.RobotPlayer;
 import java.util.ArrayList;
 import java.util.List;
 
+import static keyboardcrusader.Fighter.centerSpawn;
 import static keyboardcrusader.RobotPlayer.directions;
 import static keyboardcrusader.Strategy.robotClass;
 import static keyboardcrusader.RobotPlayer.rng;
@@ -33,24 +34,40 @@ public class MicroMovement {
         }
         if (enemies.length > 0) {
             if(robotClass == 0) {
-                fightMode = 1;
+                fightMode = 4;
             }
             if(robotClass >0){
                 fightMode = 4;
             }
         }
 
-
         if (fightMode > 0) {
             if(robotClass == 0) {
-                RobotAction.attackLowestHealthEnemy(rc);
-                if (rc.getLocation().distanceSquaredTo(closestEnemyPos) <= 2) {
-                    fineMovement(rc, rc.getLocation().add(closestEnemyPos.directionTo(rc.getLocation())));
-                    RobotAction.attackLowestHealthEnemy(rc);
-                } else {
-                    //Wait for enemy to engage
-                    //fineMovement(rc, rc.getLocation().add(rc.getLocation().directionTo(closestEnemyPos)));
-                    RobotAction.attackLowestHealthEnemy(rc);
+                if(rc.getHealth() <600){
+                    RobotAction.attackClosestEnemy(rc);
+                    fineMovement(rc, rc.getLocation().add(rc.getLocation().directionTo(centerSpawn)).add(rc.getLocation().directionTo(centerSpawn)));
+                    RobotAction.attackClosestEnemy(rc);
+
+                }
+                else {
+                    RobotAction.attackClosestEnemy(rc);
+                    if (Math.sqrt(rc.getLocation().distanceSquaredTo(closestEnemyPos)) <= 2) {
+                        fineMovement(rc, rc.getLocation().add(closestEnemyPos.directionTo(rc.getLocation())));
+                        RobotAction.attackClosestEnemy(rc);
+                    } else {
+                        if (rc.getRoundNum() % 3 == 1 && fightMode <= 2) {
+                            RobotAction.attackClosestEnemy(rc);
+                            fineMovement(rc, rc.getLocation().add(rc.getLocation().directionTo(closestEnemyPos)));
+                            RobotAction.attackClosestEnemy(rc);
+                        } else {
+                            RobotAction.attackClosestEnemy(rc);
+                            fineMovement(rc, rc.getLocation().add(closestEnemyPos.directionTo(rc.getLocation())));
+                            RobotAction.attackClosestEnemy(rc);
+                        }
+                        //Wait for enemy to engage
+                        //fineMovement(rc, rc.getLocation().add(rc.getLocation().directionTo(closestEnemyPos)));
+                        RobotAction.attackClosestEnemy(rc);
+                    }
                 }
             }
             else if(robotClass == 1){
@@ -58,7 +75,7 @@ public class MicroMovement {
                 if (rc.getLocation().distanceSquaredTo(closestEnemyPos) <= 5) {
                     fineMovement(rc, rc.getLocation().add(closestEnemyPos.directionTo(rc.getLocation())));
                     if(!RobotAction.healLowestRobot(rc)){
-                        RobotAction.attackLowestHealthEnemy(rc);
+                        RobotAction.attackClosestEnemy(rc);
                     }
                 }
             }
@@ -108,7 +125,7 @@ public class MicroMovement {
         // Use monte carlo, because it's easy to tune efficiency
 
         //This number * 7 (for every location)
-        int totalMovesToCalculate = 3;
+        int totalMovesToCalculate = 5;
         int movesInAdvance = 2;
         List<Direction> calculateLocations = new ArrayList<>();
         int biasScore[] = {1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000};

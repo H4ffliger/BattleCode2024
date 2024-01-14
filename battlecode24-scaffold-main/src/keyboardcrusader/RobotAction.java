@@ -27,6 +27,23 @@ public class RobotAction {
             }
         }
     }
+    public static void attackClosestEnemy(RobotController rc) throws GameActionException {
+        RobotInfo closestEnemyPlayer = null;
+        RobotInfo[]  enemies = rc.senseNearbyRobots(-1, rc.getTeam().opponent());
+
+        if(enemies.length > 0){
+            closestEnemyPlayer = enemies[0];
+            for(int i = enemies.length-1; i >=0; i--){
+                if(enemies[i].getLocation().distanceSquaredTo(rc.getLocation()) < closestEnemyPlayer.getLocation().distanceSquaredTo(rc.getLocation())){
+                    closestEnemyPlayer = enemies[i];
+                }
+            }
+            if(rc.canAttack(closestEnemyPlayer.getLocation())){
+                rc.attack(closestEnemyPlayer.getLocation());
+            }
+        }
+    }
+
 
 
     public static boolean healLowestRobot(RobotController rc) throws GameActionException{

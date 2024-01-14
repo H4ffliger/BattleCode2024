@@ -68,7 +68,7 @@ public class Healer {
         if(rc.getRoundNum()<200){
             MicroMovement.moveR(rc, setupLocationH);
         }
-        else if( rc.getRoundNum() < 550){
+        else if( rc.getRoundNum() < 600){
             attackLocationH = setupLocationH;
             //Smooth push
             MapLocation allySpawns[] = rc.getAllySpawnLocations();

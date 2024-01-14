@@ -96,8 +96,7 @@ public strictfp class RobotPlayer {
                     if (rc.hasFlag() && rc.getRoundNum() >= GameConstants.SETUP_ROUNDS){
                         MapLocation[] spawnLocs = rc.getAllySpawnLocations();
                         MapLocation firstLoc = spawnLocs[0];
-                        Direction dir = rc.getLocation().directionTo(firstLoc);
-                        if (rc.canMove(dir)) rc.move(dir);
+                        MicroMovement.moveR(rc, firstLoc);
                     }
 
 
@@ -109,15 +108,6 @@ public strictfp class RobotPlayer {
 
 
                     Strategy.gameStrategy(rc);
-                    /*if(rc.getID() %2 == 1){
-                        MicroMovement.moveR(rc, new MapLocation(rc.getMapWidth()/2, rc.getMapHeight()/2));
-                        rc.setIndicatorString("Moving to center X:" + Integer.toString(rc.getMapWidth()/2) + " Y:" + Integer.toString(rc.getMapHeight()/2));
-                    }
-                    else {
-                        System.out.println(Integer.toString(new Random().nextInt(5)));
-                        MicroMovement.moveR(rc, new MapLocation(new Random().nextInt(rc.getMapWidth()),new Random().nextInt(rc.getMapHeight())));
-                    }*/
-
                     updateEnemyRobots(rc);
                 }
 

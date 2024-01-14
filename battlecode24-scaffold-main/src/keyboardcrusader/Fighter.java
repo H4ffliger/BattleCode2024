@@ -11,6 +11,7 @@ public class Fighter {
     //Location where the bots should be when the dam falls
     static MapLocation setupLocation;
     static MapLocation attackLocation;
+    static MapLocation centerSpawn;
     static MapLocation closestEnemyPosF = new MapLocation(0,0);
     public static void think(RobotController rc) throws GameActionException {
 
@@ -64,10 +65,10 @@ public class Fighter {
         if(rc.getRoundNum()<200){
             MicroMovement.moveR(rc, setupLocation);
         }
-        else if( rc.getRoundNum() < 550){
+        else if( rc.getRoundNum() < 600){
             //Smooth push
             MapLocation allySpawns[] = rc.getAllySpawnLocations();
-            MapLocation centerSpawn = new MapLocation(
+            centerSpawn = new MapLocation(
                     (allySpawns[0].x + allySpawns[1].x + allySpawns[2].x)/3,
                     (allySpawns[0].y + allySpawns[1].y + allySpawns[2].y)/3);
 
