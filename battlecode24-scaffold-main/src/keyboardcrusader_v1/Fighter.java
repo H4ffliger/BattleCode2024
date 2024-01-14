@@ -1,19 +1,20 @@
-package keyboardcrusader;
+package keyboardcrusader_v1;
 
 import battlecode.common.*;
-import static keyboardcrusader.RobotAction.healLowestRobot;
-public class Healer {
-    //Healers are grouped into 4 groups
-    //Top = 0, Center = 1, Bottom = 2
-    static int healSquad;
-    //Location where the bots should be when the dam falls
-    static MapLocation setupLocationH;
-    static MapLocation attackLocationH;
-    static MapLocation closestEnemyPosF = new MapLocation(0, 0);
 
+public class Fighter {
+
+    //Figthers are grouped into 3 groups
+    //Top = 0, Center = 1, Bottom = 2
+    static int figthSquad;
+    //Location where the bots should be when the dam falls
+    static MapLocation setupLocation;
+    static MapLocation attackLocation;
+    static MapLocation centerSpawn;
+    static MapLocation closestEnemyPosF = new MapLocation(0,0);
     public static void think(RobotController rc) throws GameActionException {
 
-        if(setupLocationH == null){
+        if(setupLocation == null){
             System.out.println("Thinking for the first time on round " + rc.getRoundNum());
 
             for(int s = 63; s >= 0; s--){
@@ -27,34 +28,29 @@ public class Healer {
                         deparseX = Integer.parseInt(Integer.toString(rc.readSharedArray(rc.getID()%s+1)).substring(0, 2));
                     }
 
-                    setupLocationH = new MapLocation(deparseX, deparseY);
+                    setupLocation = new MapLocation(deparseX, deparseY);
                     System.out.println("RAW DATA: " + rc.readSharedArray(rc.getID()%s+1) + ", destructed data: " + deparseX + ";" + deparseY);
                     System.out.println("Amount of dams found: " + s);
                     s = -1;
                     break;
-                }
-                else if (s == 0) {
+                } else if (s == 0) {
                     System.out.println("Error shared string is empty No dam information");
-                    setupLocationH = new MapLocation( rc.getMapWidth()/2, rc.getMapHeight()/2);
+                    setupLocation = new MapLocation( rc.getMapWidth()/2, rc.getMapHeight()/2);
+
                 }
             }
-            Direction d;
-            //Fall behind fighters
-            d = setupLocationH.directionTo(rc.getAllySpawnLocations()[1]);
-            setupLocationH = setupLocationH.add(d).add(d).add(d);
         }
+
+
 
         RobotInfo[] enemies = rc.senseNearbyRobots(-1, rc.getTeam().opponent());
 
-        //Heal
-        healLowestRobot(rc);
-
-        //Healers set traps too
         for (int i = enemies.length - 1; i >= 0; i--) {
             if (closestEnemyPosF.distanceSquaredTo(rc.getLocation()) > rc.getLocation().distanceSquaredTo(enemies[i].getLocation())) {
                 closestEnemyPosF = enemies[i].getLocation();
             }
         }
+
         if(rc.getLocation().distanceSquaredTo(closestEnemyPosF) <=3){
             if(rc.canBuild(TrapType.EXPLOSIVE, rc.getLocation().add(rc.getLocation().directionTo(closestEnemyPosF)).add(rc.getLocation().directionTo(closestEnemyPosF)))){
                 rc.build(TrapType.EXPLOSIVE, rc.getLocation().add(rc.getLocation().directionTo(closestEnemyPosF)).add(rc.getLocation().directionTo(closestEnemyPosF)));
@@ -66,34 +62,28 @@ public class Healer {
 
 
         if(rc.getRoundNum()<200){
-            MicroMovement.moveR(rc, setupLocationH);
+            MicroMovement.moveR(rc, setupLocation);
         }
         else if( rc.getRoundNum() < 600){
-            attackLocationH = setupLocationH;
             //Smooth push
             MapLocation allySpawns[] = rc.getAllySpawnLocations();
-
-            MapLocation centerSpawn = new MapLocation(
+            centerSpawn = new MapLocation(
                     (allySpawns[0].x + allySpawns[1].x + allySpawns[2].x)/3,
                     (allySpawns[0].y + allySpawns[1].y + allySpawns[2].y)/3);
-            Direction d = new MapLocation(rc.getMapWidth()/2, rc.getMapHeight()/2).directionTo(centerSpawn);
+            /*Direction d = new MapLocation(rc.getMapWidth()/2, rc.getMapHeight()/2).directionTo(centerSpawn);
             try {
                 centerSpawn.add(d).add(d).add(d).add(d).add(d);
             }
-            catch (Exception e){}
+            catch (Exception e)*/
 
-            attackLocationH = setupLocationH;
+            attackLocation = setupLocation;
             for(int i = ((rc.getRoundNum()-200)/((rc.getMapHeight()+rc.getMapWidth())/4)); i >=0; i --) {
-                attackLocationH = attackLocationH.add(centerSpawn.directionTo(setupLocationH));
+                attackLocation = attackLocation.add(centerSpawn.directionTo(setupLocation));
             }
-            MicroMovement.moveR(rc, attackLocationH);
+            MicroMovement.moveR(rc, attackLocation);
         }
         else{
-            MicroMovement.moveR(rc, attackLocationH);
+            MicroMovement.moveR(rc, attackLocation);
         }
-
-
-
-
     }
 }

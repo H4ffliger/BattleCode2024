@@ -1,7 +1,8 @@
-package keyboardcrusader;
+package keyboardcrusader_v1;
 
 import battlecode.common.*;
-import static keyboardcrusader.RobotAction.healLowestRobot;
+
+import static keyboardcrusader_v1.RobotAction.healLowestRobot;
 public class Healer {
     //Healers are grouped into 4 groups
     //Top = 0, Center = 1, Bottom = 2
@@ -76,11 +77,6 @@ public class Healer {
             MapLocation centerSpawn = new MapLocation(
                     (allySpawns[0].x + allySpawns[1].x + allySpawns[2].x)/3,
                     (allySpawns[0].y + allySpawns[1].y + allySpawns[2].y)/3);
-            Direction d = new MapLocation(rc.getMapWidth()/2, rc.getMapHeight()/2).directionTo(centerSpawn);
-            try {
-                centerSpawn.add(d).add(d).add(d).add(d).add(d);
-            }
-            catch (Exception e){}
 
             attackLocationH = setupLocationH;
             for(int i = ((rc.getRoundNum()-200)/((rc.getMapHeight()+rc.getMapWidth())/4)); i >=0; i --) {
