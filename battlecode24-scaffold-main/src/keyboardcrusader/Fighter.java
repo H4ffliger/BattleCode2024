@@ -71,11 +71,7 @@ public class Fighter {
             centerSpawn = new MapLocation(
                     (allySpawns[0].x + allySpawns[1].x + allySpawns[2].x)/3,
                     (allySpawns[0].y + allySpawns[1].y + allySpawns[2].y)/3);
-            Direction d = new MapLocation(rc.getMapWidth()/2, rc.getMapHeight()/2).directionTo(centerSpawn);
-            try {
-                centerSpawn.add(d).add(d).add(d).add(d).add(d);
-            }
-            catch (Exception e){}
+
 
             attackLocation = setupLocation;
             for(int i = ((rc.getRoundNum()-200)/((rc.getMapHeight()+rc.getMapWidth())/4)); i >=0; i --) {
