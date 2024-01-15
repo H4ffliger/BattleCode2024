@@ -84,6 +84,7 @@ public strictfp class RobotPlayer {
                         System.out.println(rc.readSharedArray(0));
                     }
 
+
                     if (rc.canPickupFlag(rc.getLocation())){
                         rc.pickupFlag(rc.getLocation());
                         rc.setIndicatorString("Holding a flag!");
@@ -93,8 +94,13 @@ public strictfp class RobotPlayer {
                     // to make sure setup phase has ended.
                     if (rc.hasFlag() && rc.getRoundNum() >= GameConstants.SETUP_ROUNDS){
                         MapLocation[] spawnLocs = rc.getAllySpawnLocations();
-                        MapLocation firstLoc = spawnLocs[0];
-                        MicroMovement.moveR(rc, firstLoc);
+                        MapLocation closestSpawn = spawnLocs[0];
+                        for(int i = spawnLocs.length -1; i >= 0; i--){
+                            if(rc.getLocation().distanceSquaredTo(closestSpawn) > rc.getLocation().distanceSquaredTo(spawnLocs[i])){
+                                closestSpawn = spawnLocs[i];
+                            }
+                        }
+                        MicroMovement.moveR(rc, closestSpawn);
                     }
 
 
