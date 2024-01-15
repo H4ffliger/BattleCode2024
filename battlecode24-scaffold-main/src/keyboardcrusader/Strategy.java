@@ -193,6 +193,7 @@ public class Strategy {
                         robotClass = 0;
                         Fighter.think(rc);
                         rc.setIndicatorString("Fighter");
+                        
                     }
 
                 }
