@@ -106,6 +106,8 @@ public class MicroMovement {
 
     public static void fineMovement(RobotController rc, MapLocation mapLocation) throws GameActionException {
 
+
+
         //AntiStuck mechanics edge
         //ToDo: Wenn Ziel zu weit weg, dann einen Zwischenpunkt festlegen
         /*if(rc.getRoundNum()+rc.getID()%10 == 1){
@@ -127,6 +129,13 @@ public class MicroMovement {
         //This number * 7 (for every location)
         int totalMovesToCalculate = 5;
         int movesInAdvance = 2;
+        movesInAdvance = (int) Math.sqrt(rc.getLocation().distanceSquaredTo(mapLocation)) -1;
+        if(movesInAdvance < 0){
+            movesInAdvance = 0;
+        }
+        if(movesInAdvance >2){
+            movesInAdvance = 2;
+        }
         List<Direction> calculateLocations = new ArrayList<>();
         int biasScore[] = {1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000};
         MapInfo isPassable[] = rc.senseNearbyMapInfos(2);
