@@ -19,7 +19,7 @@ public class Healer {
             for(int s = 63; s >= 0; s--){
                 if(rc.readSharedArray(s) != 0 && s != 0){
                     int deparseX;
-                    int deparseY = Integer.parseInt(Integer.toString(rc.readSharedArray(rc.getID()%s+1)).substring(2));
+                    int deparseY = Integer.parseInt(Integer.toString(rc.readSharedArray(rc.getID()%s+1)).substring(2)); //ToDo: Bugs beheben
                     if(Integer.toString(rc.readSharedArray(rc.getID()%s+1)).length()==4){
                         deparseX = Integer.parseInt(Integer.toString(rc.readSharedArray(rc.getID()%s+1)).substring(0, 1));
                     }

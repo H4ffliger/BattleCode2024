@@ -51,24 +51,29 @@ public class MicroMovement {
                 }
                 else {
                     RobotAction.attackClosestEnemy(rc);
-                    if (Math.sqrt(rc.getLocation().distanceSquaredTo(closestEnemyPos)) <= 2) {
+                    if (Math.sqrt(rc.getLocation().distanceSquaredTo(closestEnemyPos)) < 2) {
                         fineMovement(rc, rc.getLocation().add(closestEnemyPos.directionTo(rc.getLocation())));
                         RobotAction.attackClosestEnemy(rc);
                     } else {
-                        if (rc.getRoundNum() % 3 == 1 && fightMode <= 2) {
+                        if (rc.getRoundNum() % 3 == 1) {
                             RobotAction.attackClosestEnemy(rc);
                             fineMovement(rc, rc.getLocation().add(rc.getLocation().directionTo(closestEnemyPos)));
                             RobotAction.attackClosestEnemy(rc);
                         } else {
                             RobotAction.attackClosestEnemy(rc);
-                            fineMovement(rc, rc.getLocation().add(closestEnemyPos.directionTo(rc.getLocation())));
+                            if(Math.sqrt(rc.getLocation().distanceSquaredTo(closestEnemyPos)) > 3){
+                                fineMovement(rc, rc.getLocation().add(rc.getLocation().directionTo(closestEnemyPos)));
+                            }
+                            //fineMovement(rc, rc.getLocation().add(closestEnemyPos.directionTo(rc.getLocation())));
                             RobotAction.attackClosestEnemy(rc);
                         }
                         //Wait for enemy to engage
                         //fineMovement(rc, rc.getLocation().add(rc.getLocation().directionTo(closestEnemyPos)));
                         RobotAction.attackClosestEnemy(rc);
                     }
+                    RobotAction.healLowestRobot(rc);
                 }
+
             }
             else if(robotClass == 1){
                 RobotAction.healLowestRobot(rc);
@@ -127,10 +132,10 @@ public class MicroMovement {
         // Use monte carlo, because it's easy to tune efficiency
 
         //This number * 7 (for every location)
-        int totalMovesToCalculate = 5;
-        int movesInAdvance = 2;
-        movesInAdvance = (int) Math.sqrt(rc.getLocation().distanceSquaredTo(mapLocation)) -1;
-        if(movesInAdvance < 0){
+        int totalMovesToCalculate = 7;
+        int movesInAdvance;
+        movesInAdvance = (int) Math.sqrt(rc.getLocation().distanceSquaredTo(mapLocation))-1;
+        if(movesInAdvance <= 0){
             movesInAdvance = 0;
         }
         if(movesInAdvance >2){
@@ -154,7 +159,7 @@ public class MicroMovement {
                 if(rc.canMove(tempFutureGuessLocation)){
                     MapLocation tempMp = rc.getLocation().add(tempFutureGuessLocation);
                     for(int a = movesInAdvance; a >= 0; a--) {
-                        Direction rngDirection = Direction.values()[rng.nextInt(directions.length)];
+                        Direction rngDirection = Direction.values()[s];
                         boolean canMove = true;
                         for (int i = passable.size() - 1; i >= 0; i--) {
                             if (tempMp.add(rngDirection) ==passable.get(i)) {
