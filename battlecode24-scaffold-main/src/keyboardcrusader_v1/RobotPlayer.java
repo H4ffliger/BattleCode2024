@@ -84,8 +84,16 @@ public strictfp class RobotPlayer {
                         System.out.println(rc.readSharedArray(0));
                     }
 
+                    MapLocation[] spawnLocs = rc.getAllySpawnLocations();
+                    MapLocation closestSpawn = spawnLocs[0];
 
-                    if (rc.canPickupFlag(rc.getLocation())){
+                    boolean friendlyFlag = false;
+                    for(int i = spawnLocs.length -1; i >= 0; i--){
+                        if (rc.canPickupFlag(rc.getLocation()) && rc.getLocation() == spawnLocs[i]){
+                            friendlyFlag = true;
+                        }
+                    }
+                    if(friendlyFlag == false && rc.canPickupFlag(rc.getLocation())){
                         rc.pickupFlag(rc.getLocation());
                         rc.setIndicatorString("Holding a flag!");
                     }
@@ -93,8 +101,6 @@ public strictfp class RobotPlayer {
                     // an ally spawn zone to capture it! We use the check roundNum >= SETUP_ROUNDS
                     // to make sure setup phase has ended.
                     if (rc.hasFlag() && rc.getRoundNum() >= GameConstants.SETUP_ROUNDS){
-                        MapLocation[] spawnLocs = rc.getAllySpawnLocations();
-                        MapLocation closestSpawn = spawnLocs[0];
                         for(int i = spawnLocs.length -1; i >= 0; i--){
                             if(rc.getLocation().distanceSquaredTo(closestSpawn) > rc.getLocation().distanceSquaredTo(spawnLocs[i])){
                                 closestSpawn = spawnLocs[i];
