@@ -13,7 +13,12 @@ import static keyboardcrusader.RobotPlayer.rng;
 
 public class MicroMovement {
     static int fightMode = 0;
+    static int specialMovement = 0;
+    static boolean lastDirectionChangeWasLeft = false;
 
+    static Direction specialDirection;
+    static Direction lastDirection;
+    static MapLocation lastLocation;
     static MapLocation rngMapLocation;
     static int rngMapLocationCooldown = 0;
     MapLocation lastEnemyPos;
@@ -37,7 +42,7 @@ public class MicroMovement {
                 fightMode = 4;
             }
             if(robotClass >0){
-                fightMode = 4;
+                fightMode = 10;
             }
         }
 
@@ -45,9 +50,10 @@ public class MicroMovement {
             if(robotClass == 0) {
                 if(rc.getHealth() <600){
                     RobotAction.attackClosestEnemy(rc);
-                    fineMovement(rc, rc.getLocation().add(rc.getLocation().directionTo(centerSpawn)).add(rc.getLocation().directionTo(centerSpawn)));
+                    if(Math.sqrt(rc.getLocation().distanceSquaredTo(closestEnemyPos)) < 4) {
+                        fineMovement(rc, rc.getLocation().add(closestEnemyPos.directionTo(rc.getLocation())));
+                    }
                     RobotAction.attackClosestEnemy(rc);
-
                 }
                 else {
                     RobotAction.attackClosestEnemy(rc);
@@ -77,10 +83,16 @@ public class MicroMovement {
             }
             else if(robotClass == 1){
                 RobotAction.healLowestRobot(rc);
-                if (rc.getLocation().distanceSquaredTo(closestEnemyPos) <= 5) {
+                if (rc.getLocation().distanceSquaredTo(closestEnemyPos) <= 6) {
                     fineMovement(rc, rc.getLocation().add(closestEnemyPos.directionTo(rc.getLocation())));
                     if(!RobotAction.healLowestRobot(rc)){
                         RobotAction.attackClosestEnemy(rc);
+                    }
+                }
+                else{
+                    MapLocation mp = RobotAction.getLowerRobot(rc);
+                    if(mp != null){
+                        fineMovement(rc, mp);
                     }
                 }
             }
@@ -103,6 +115,7 @@ public class MicroMovement {
                 Direction d = rc.getLocation().directionTo(mapLocation);
                 mapLocation = rc.getLocation().add(d).add(d).add(d).add(d).add(d).add(d).add(d);
             }
+
             fineMovement(rc, mapLocation);
             RobotAction.healLowestRobot(rc);
             }
@@ -113,28 +126,57 @@ public class MicroMovement {
 
 
 
+
+
+
+
+
         //AntiStuck mechanics edge
         //ToDo: Wenn Ziel zu weit weg, dann einen Zwischenpunkt festlegen
-        /*if(rc.getRoundNum()+rc.getID()%10 == 1){
-            if(rc.getLocation().distanceSquaredTo(latestSelfLocation) <3){
-                antiStuckSteps = 10;
-            }
-            latestSelfLocation = rc.getLocation();
-        }
-        if(antiStuckSteps >= 0){
-            if(antiStuckStrategy == 0){
-                mapLocation = new MapLocation(rc.getMapWidth()/2, rc.getMapHeight()/2);
-            }
-        }
-        antiStuckSteps --;*/
 
-        //Calculates best moves for the future for the next 4 moves
-        // Use monte carlo, because it's easy to tune efficiency
 
-        //This number * 7 (for every location)
         int totalMovesToCalculate = 7;
         int movesInAdvance;
         movesInAdvance = (int) Math.sqrt(rc.getLocation().distanceSquaredTo(mapLocation))-1;
+
+/*
+        if(rc.getRoundNum()%10==1){
+            if(rc.getLocation().distanceSquaredTo(latestSelfLocation) <6 && rc.getLocation().distanceSquaredTo(mapLocation) >= 10){
+                antiStuckSteps = (rc.getMapWidth()+rc.getMapHeight())/5;
+            }
+            latestSelfLocation = rc.getLocation();
+        }
+
+        //If the target location is more 4 tiles away, we have to go to a more basic pathfinding system
+
+        if(antiStuckSteps >= 0){
+
+            if(specialDirection == null){
+                specialDirection = rc.getLocation().directionTo(mapLocation);
+                lastDirection = specialDirection;
+                lastLocation = rc.getLocation();
+            }
+            Direction d = rc.getLocation().directionTo(mapLocation);
+            if(rc.canMove(lastDirection)){
+                rc.move(lastDirection);
+            }
+            else {
+                Direction tempDir = lastDirection;
+                for(int l = 2; l>=0; l--){
+                    tempDir = tempDir.rotateRight();
+                    if(rc.canMove(tempDir)){
+                        lastDirectionChangeWasLeft = false;
+                        lastDirection = tempDir;
+                    }
+                }
+
+            specialMovement --;
+            }
+            antiStuckSteps --;
+            //Check if it's possible to move directly to the given location
+        }*/
+
+
         if(movesInAdvance <= 0){
             movesInAdvance = 0;
         }

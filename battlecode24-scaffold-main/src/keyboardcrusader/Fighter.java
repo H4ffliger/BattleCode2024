@@ -77,8 +77,22 @@ public class Fighter {
             for(int i = ((rc.getRoundNum()-200)/((rc.getMapHeight()+rc.getMapWidth())/4)); i >=0; i --) {
                 attackLocation = attackLocation.add(centerSpawn.directionTo(setupLocation));
             }
+
+            FlagInfo flags[] = rc.senseNearbyFlags(-1, rc.getTeam().opponent());
+            for(int f = flags.length-1; f >= 0; f--){
+                if(flags[f].isPickedUp() == false){
+                    attackLocation = flags[f].getLocation();
+                }
+            }
+
+
             MicroMovement.moveR(rc, attackLocation);
         }
+
+
+
+
+
         else{
             MicroMovement.moveR(rc, attackLocation);
         }

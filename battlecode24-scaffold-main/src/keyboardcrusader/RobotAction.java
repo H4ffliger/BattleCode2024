@@ -1,6 +1,7 @@
 package keyboardcrusader;
 
 import battlecode.common.GameActionException;
+import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 
@@ -65,4 +66,27 @@ public class RobotAction {
         }
         return false;
     }
+
+    public static MapLocation getLowerRobot(RobotController rc) throws GameActionException{
+        RobotInfo[]  friends = rc.senseNearbyRobots(-1, rc.getTeam());
+        RobotInfo lowestRobotPlayer = null;
+
+        if(friends.length > 0){
+            lowestRobotPlayer = friends[0];
+            for(int i = friends.length-1; i >=0; i--){
+                if(friends[i].getHealth()<1000 && lowestRobotPlayer.getHealth() > friends[i].getHealth()){
+                    lowestRobotPlayer = friends[i];
+                }
+            }
+
+        }
+        if(lowestRobotPlayer != null){
+            return lowestRobotPlayer.getLocation();
+        }
+        else {
+            return rc.getLocation();
+        }
+
+    }
+
 }

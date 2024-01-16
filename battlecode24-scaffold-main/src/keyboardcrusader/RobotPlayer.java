@@ -96,6 +96,7 @@ public strictfp class RobotPlayer {
                             friendlyFlag = true;
                         }
                     }
+
                     if(friendlyFlag == false && rc.canPickupFlag(rc.getLocation())){
                         rc.pickupFlag(rc.getLocation());
                         rc.setIndicatorString("Holding a flag!");
