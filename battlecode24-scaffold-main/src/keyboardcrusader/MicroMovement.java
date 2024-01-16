@@ -29,7 +29,7 @@ public class MicroMovement {
     static int antiStuckSteps = 0;
 
     public static void moveR(RobotController rc, MapLocation mapLocation) throws GameActionException {
-        RobotInfo[] enemies = rc.senseNearbyRobots(-1, rc.getTeam().opponent());
+        RobotInfo[] enemies = rc.senseNearbyRobots(4*4, rc.getTeam().opponent());
         RobotInfo[] friends = rc.senseNearbyRobots(-1, rc.getTeam());
 
         for (int i = enemies.length - 1; i >= 0; i--) {
@@ -42,7 +42,7 @@ public class MicroMovement {
                 fightMode = 4;
             }
             if(robotClass >0){
-                fightMode = 10;
+                fightMode = 4;
             }
         }
 
